@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { View, Text, Pressable, ActivityIndicator, AppState } from 'react-native';
+import { View, Text, Pressable, ActivityIndicator, AppState, Platform } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import type { Forecast } from './src/core/forecast';
@@ -30,7 +30,7 @@ function Main() {
     try {
       const r = await refreshForecast();
       setF(r.forecast); last.current = Date.now();
-      setNotice(r.tabuaOk ? null : 'Não consegui ler o tabuademares agora. Marés e atividade estão sendo calculadas pelo app (estimativa).');
+      setNotice(r.tabuaOk ? null : Platform.OS === 'web' ? 'Nesta versão do site, marés e atividade são calculadas pelo app (estimativa). Os dados exatos do tabuademares chegam pelo app do celular ou pela versão com servidor.' : 'Não consegui ler o tabuademares agora. Marés e atividade estão sendo calculadas pelo app (estimativa).');
       const s = await loadSettings();
       if (s.ativo) await scheduleAlerts(r.forecast, s);
     } catch (e) {

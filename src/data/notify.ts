@@ -17,7 +17,7 @@ Notifications.setNotificationHandler({
 export { passa, planAlerts } from '../core/alerts';
 
 /** No app nativo as notificações são locais e sempre suportadas. */
-export function pushSupport(): 'ok' | 'ios-instalar' | 'sem-suporte' { return 'ok'; }
+export function pushSupport(): 'ok' | 'ios-instalar' | 'sem-suporte' | 'sem-servidor' { return 'ok'; }
 
 export async function ensurePermission(): Promise<boolean> {
   if (Platform.OS === 'android') {

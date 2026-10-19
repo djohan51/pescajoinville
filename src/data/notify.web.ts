@@ -9,8 +9,9 @@ export const BG_TASK = 'web';
 const VAPID = process.env.EXPO_PUBLIC_VAPID_PUBLIC_KEY ?? '';
 const API = process.env.EXPO_PUBLIC_API_BASE ?? '';
 
-export function pushSupport(): 'ok' | 'ios-instalar' | 'sem-suporte' {
+export function pushSupport(): 'ok' | 'ios-instalar' | 'sem-suporte' | 'sem-servidor' {
   if (typeof window === 'undefined') return 'sem-suporte';
+  if (!VAPID) return 'sem-servidor';
   const ios = /iphone|ipad|ipod/i.test(navigator.userAgent);
   const standalone = window.matchMedia?.('(display-mode: standalone)').matches || (navigator as unknown as { standalone?: boolean }).standalone === true;
   if (ios && !standalone) return 'ios-instalar';
@@ -53,7 +54,7 @@ export async function scheduleAlerts(f: Forecast, s: AlertSettings): Promise<num
 
 export async function registerBackground(): Promise<void> {
   if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-    try { await navigator.serviceWorker.register('/sw.js'); } catch { /* sem service worker */ }
+    try { await navigator.serviceWorker.register(new URL('sw.js', location.href.replace(/[^/]*$/, '')).pathname); } catch { /* sem service worker */ }
   }
 }
 

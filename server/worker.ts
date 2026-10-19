@@ -18,8 +18,10 @@ export interface Env {
 }
 
 const TABUA_TTL_MS = 3 * 3600_000;
+// CORS liberado: o site pode estar em outro endereço (ex.: GitHub Pages) e usar esta API.
+const CORS = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type' };
 const json = (data: unknown, status = 200) => new Response(JSON.stringify(data), {
-  status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store' },
+  status, headers: { 'Content-Type': 'application/json; charset=utf-8', 'Cache-Control': 'no-store', ...CORS },
 });
 
 async function sha(s: string): Promise<string> {
@@ -112,6 +114,7 @@ async function runAlerts(env: Env, run: 'manha' | 'vespera'): Promise<{ sent: nu
 export default {
   async fetch(req: Request, env: Env): Promise<Response> {
     const url = new URL(req.url);
+    if (url.pathname.startsWith('/api/') && req.method === 'OPTIONS') return new Response(null, { status: 204, headers: CORS });
     if (url.pathname.startsWith('/api/')) return handleApi(req, env, url);
     return env.ASSETS.fetch(req);
   },

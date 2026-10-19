@@ -42,6 +42,7 @@ export default function Avisos({ f }: { f: Forecast }) {
     try {
       const sup = pushSupport();
       if (s.ativo && sup === 'ios-instalar') { setMsg('No iPhone, instale o app primeiro: toque em Compartilhar › Adicionar à Tela de Início e abra pelo ícone.'); return; }
+      if (s.ativo && sup === 'sem-servidor') { setMsg('Os avisos desta versão do site ainda não estão ligados (falta o servidor). No app do celular eles já funcionam.'); return; }
       if (s.ativo && sup === 'sem-suporte') { setMsg('Este navegador não recebe avisos. Use Chrome, Edge, Firefox ou Safari atualizados.'); return; }
       if (s.ativo && !(await ensurePermission())) {
         setMsg(Platform.OS === 'web' ? 'O navegador bloqueou as notificações deste site. Libere nas configurações do navegador e tente de novo.' : 'O app não tem permissão para notificar. Libere em Ajustes › Notificações › Pesca Joinville.');
