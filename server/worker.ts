@@ -6,6 +6,7 @@
 import { parseTabua, TABUA_URL, type Tabua } from '../src/core/tabua';
 import { fetchWeather, fetchMarine } from '../src/core/weather';
 import { buildForecast } from '../src/core/forecast';
+import { localDateKey } from '../src/core/time';
 import { alertForRun, type AlertSettings, type PlannedAlert } from '../src/core/alerts';
 import { sendPush, type PushSub } from './webpush';
 
@@ -92,13 +93,26 @@ async function handleApi(req: Request, env: Env, url: URL): Promise<Response> {
 async function runAlerts(env: Env, run: 'manha' | 'vespera'): Promise<{ sent: number; removed: number }> {
   const tab = await getTabua(env).catch(() => null);
   const [w, m] = await Promise.all([fetchWeather(), fetchMarine().catch(() => null)]);
-  const forecast = buildForecast(tab?.tabua ?? null, w, m);
-  let sent = 0, removed = 0, cursor: string | undefined;
+  // Lê as inscrições primeiro para calcular só o necessário (o plano grátis limita o processamento).
+  const recs: { key: string; subscription: PushSub; settings: AlertSettings }[] = [];
+  let cursor: string | undefined;
   do {
     const page = await env.PESCA.list({ prefix: 'sub:', cursor });
     for (const k of page.keys) {
       const rec = await env.PESCA.get<{ subscription: PushSub; settings: AlertSettings }>(k.name, 'json');
-      if (!rec) continue;
+      if (rec && rec.settings.ativo && rec.settings.quando === run) recs.push({ key: k.name, ...rec });
+    }
+    cursor = page.list_complete ? undefined : page.cursor;
+  } while (cursor);
+  if (!recs.length) return { sent: 0, removed: 0 };
+  const now = Date.now();
+  const target = localDateKey(run === 'manha' ? now : now + 12 * 3600_000); // 19h → avisa sobre amanhã
+  const species = [...new Set(recs.filter(r => r.settings.base === 'spec').map(r => r.settings.especie))];
+  const forecast = buildForecast(tab?.tabua ?? null, w, m, now, { days: [target], species });
+  let sent = 0, removed = 0;
+  {
+    for (const rec of recs) {
+      const k = { name: rec.key };
       const alert: PlannedAlert | null = alertForRun(forecast, rec.settings, run);
       if (!alert) continue;
       const id = k.name.slice(4);
@@ -106,8 +120,7 @@ async function runAlerts(env: Env, run: 'manha' | 'vespera'): Promise<{ sent: nu
       const st = await sendPush(env, rec.subscription);
       if (st === 404 || st === 410) { await env.PESCA.delete(k.name); removed++; } else if (st < 300) sent++;
     }
-    cursor = page.list_complete ? undefined : page.cursor;
-  } while (cursor);
+  }
   return { sent, removed };
 }
 

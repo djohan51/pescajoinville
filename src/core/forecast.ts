@@ -53,7 +53,9 @@ function sunTimes(key: string): [string, string] {
   return [r ? fmtH(localHour(r.date.getTime())) : '5:30', s ? fmtH(localHour(s.date.getTime())) : '18:30'];
 }
 
-export function buildForecast(tabua: Tabua | null, W: Weather, M: Marine | null, now = Date.now()): Forecast {
+/** opts.days / opts.species limitam o cálculo (o servidor só precisa do dia do aviso e das espécies escolhidas). */
+export type BuildOpts = { days?: string[]; species?: string[] };
+export function buildForecast(tabua: Tabua | null, W: Weather, M: Marine | null, now = Date.now(), opts: BuildOpts = {}): Forecast {
   const today = localDateKey(now);
   const wT0 = Date.parse(W.t0 + ':00Z') - TZ_OFFSET_H * HOUR_MS;
   const mT0 = M ? Date.parse(M.t0 + ':00Z') - TZ_OFFSET_H * HOUR_MS : 0;
@@ -68,6 +70,7 @@ export function buildForecast(tabua: Tabua | null, W: Weather, M: Marine | null,
   const days: DayForecast[] = [];
   for (let i = 0; i < 7; i++) {
     const key = addDays(today, i);
+    if (opts.days && !opts.days.includes(key)) continue;
     const t0 = localMidnight(key);
     if (idx(t0 + 23 * HOUR_MS) >= W.p.length - 1 && i > 0) break;
     const site = tabua?.[key];
@@ -125,6 +128,7 @@ export function buildForecast(tabua: Tabua | null, W: Weather, M: Marine | null,
     const month = new Date(t0 + 12 * HOUR_MS).getUTCMonth() + 1;
     const sstDay = hours.reduce((s, x) => s + x.sst, 0) / 24;
     for (const [sk, s] of Object.entries(SPECIES)) {
+      if (opts.species && !opts.species.includes(sk)) continue;
       let sl: number[] = [];
       for (let k = 0; k < 48; k++) {
         const x = k / 2 + 0.25, ms = t0 + x * HOUR_MS;
