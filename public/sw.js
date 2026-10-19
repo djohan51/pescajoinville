@@ -1,6 +1,9 @@
 // Service worker do Pesca Joinville: funciona offline e mostra os avisos (Web Push).
-const CACHE = 'pesca-v2';
+const CACHE = 'pesca-v3';
 const BASE = new URL('./', self.location).pathname; // '/' ou '/pescajoinville/'
+// Endereço do servidor (Cloudflare) quando ele fica fora do site, ex.: GitHub Pages. Vem em sw.js?api=...
+const API = new URL(self.location).searchParams.get('api') || '';
+const apiUrl = (path) => (API ? API.replace(/\/$/, '') + '/' : BASE) + path;
 const SHELL = [BASE, BASE + 'manifest.webmanifest', BASE + 'icons/icon-192.png', BASE + 'icons/icon-512.png'];
 
 self.addEventListener('install', (e) => {
@@ -33,7 +36,7 @@ self.addEventListener('push', (e) => {
     if (!msg) {
       try {
         const sub = await self.registration.pushManager.getSubscription();
-        const r = await fetch(BASE + 'api/push/last?endpoint=' + encodeURIComponent(sub ? sub.endpoint : ''));
+        const r = await fetch(apiUrl('api/push/last?endpoint=') + encodeURIComponent(sub ? sub.endpoint : ''));
         if (r.ok) msg = await r.json();
       } catch (_) { /* sem rede */ }
     }

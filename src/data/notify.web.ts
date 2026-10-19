@@ -54,7 +54,7 @@ export async function scheduleAlerts(f: Forecast, s: AlertSettings): Promise<num
 
 export async function registerBackground(): Promise<void> {
   if (typeof navigator !== 'undefined' && 'serviceWorker' in navigator) {
-    try { await navigator.serviceWorker.register(new URL('sw.js', location.href.replace(/[^/]*$/, '')).pathname); } catch { /* sem service worker */ }
+    try { await navigator.serviceWorker.register(new URL('sw.js', location.href.replace(/[^/]*$/, '')).pathname + (API ? '?api=' + encodeURIComponent(API) : '')); } catch { /* sem service worker */ }
   }
 }
 
