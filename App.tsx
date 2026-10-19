@@ -30,7 +30,7 @@ function Main() {
     try {
       const r = await refreshForecast();
       setF(r.forecast); last.current = Date.now();
-      setNotice(r.tabuaOk ? null : Platform.OS === 'web' ? 'Nesta versão do site, marés e atividade são calculadas pelo app (estimativa). Os dados exatos do tabuademares chegam pelo app do celular ou pela versão com servidor.' : 'Não consegui ler o tabuademares agora. Marés e atividade estão sendo calculadas pelo app (estimativa).');
+      setNotice(r.tabuaOk || Platform.OS === 'web' ? null : 'Não consegui ler o tabuademares agora. Marés e atividade estão sendo calculadas pelo app (estimativa).');
       const s = await loadSettings();
       if (s.ativo) await scheduleAlerts(r.forecast, s);
     } catch (e) {
