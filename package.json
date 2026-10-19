@@ -1,22 +1,44 @@
 {
-  "name": "pesca-joinville-app",
+  "name": "pesca-joinville",
   "version": "1.0.0",
   "main": "index.ts",
   "dependencies": {
+    "@expo/metro-runtime": "~58.0.14",
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "astronomy-engine": "^2.1.19",
     "expo": "~58.0.16",
+    "expo-background-task": "~58.0.11",
+    "expo-device": "~58.0.5",
+    "expo-notifications": "~58.1.5",
     "expo-status-bar": "~58.0.3",
+    "expo-task-manager": "~58.0.12",
     "react": "19.3.0",
-    "react-native": "0.88.0"
+    "react-dom": "19.3.0",
+    "react-native": "0.88.0",
+    "react-native-safe-area-context": "~5.10.1",
+    "react-native-svg": "15.16.0",
+    "react-native-web": "~0.21.4",
+    "web-push": "^3.6.7"
   },
   "devDependencies": {
+    "@cloudflare/workers-types": "^5.20261019.1",
     "@types/react": "~19.3.0",
+    "@types/web-push": "^3.6.4",
+    "@vercel/node": "^24.0.3",
+    "esbuild": "^0.28.2",
+    "tsx": "^4.23.15",
     "typescript": "~6.0.3"
   },
   "scripts": {
     "start": "expo start",
     "android": "expo start --android",
     "ios": "expo start --ios",
-    "web": "expo start --web"
+    "web": "expo start --web",
+    "test": "tsx test/forecast.test.ts && tsx test/worker.test.ts",
+    "typecheck": "tsc --noEmit",
+    "web:build": "expo export --platform web",
+    "server:dev": "cd server && npx wrangler dev",
+    "server:deploy": "npm run web:build && cd server && npx wrangler deploy"
   },
   "private": true
 }

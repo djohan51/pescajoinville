@@ -1,0 +1,24 @@
+name = "pesca-joinville"
+main = "worker.ts"
+compatibility_date = "2026-06-01"
+
+# O site/PWA gerado por `npx expo export --platform web` (pasta dist na raiz do projeto)
+[assets]
+directory = "../dist"
+binding = "ASSETS"
+not_found_handling = "single-page-application"
+run_worker_first = ["/api/*"]
+
+# Banco simples para a tábua em cache e as inscrições de aviso.
+# Crie com: npx wrangler kv namespace create PESCA  — e cole o id abaixo.
+[[kv_namespaces]]
+binding = "PESCA"
+id = "COLE_AQUI_O_ID_DO_KV"
+
+[vars]
+VAPID_SUBJECT = "mailto:laboratorio@fablabjoinville.com.br"
+VAPID_PUBLIC_KEY = "COLE_AQUI_A_CHAVE_PUBLICA"
+
+# 09:00 UTC = 6h em Joinville (aviso do dia) · 22:00 UTC = 19h (aviso da véspera)
+[triggers]
+crons = ["0 9 * * *", "0 22 * * *"]

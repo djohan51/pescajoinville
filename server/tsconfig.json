@@ -1,0 +1,7 @@
+{
+  "compilerOptions": {
+    "target": "es2022", "module": "es2022", "moduleResolution": "bundler", "lib": ["es2022"],
+    "types": [], "strict": true, "resolveJsonModule": true, "skipLibCheck": true, "noEmit": true
+  },
+  "include": ["*.ts", "../src/core/*.ts"]
+}
